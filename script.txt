@@ -1,0 +1,210 @@
+CREATE TABLE tbl_skill (
+skill_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL UNIQUE,
+category TEXT NOT NULL,
+CHECK(category IN ('Software', 'FineArts', 'Science','Sports'))
+);
+
+Create TABLE tbl_address(
+address_id SERIAL PRIMARY KEY,
+country TEXT NOT NULL,
+city TEXT NOT NULL,
+street TEXT NOT NULL,
+zip INTEGER NOT NULL
+);
+
+CREATE TABLE tbl_organization(
+org_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL UNIQUE,
+phone VARCHAR(11) NOT NULL,
+mail TEXT NOT NULL UNIQUE,
+type VARCHAR(3) NOT NULL,
+CHECK( type IN ('CMP,'UNI'))
+);
+
+CREATE FUNCTION get_type(data_id INT)
+RETURNS VARCHAR(3)
+AS $$
+BEGIN
+RETURN (SELECT type FROM tbl_organization WHERE org_id = data_id);
+END; $$
+LANGUAGE PLPGSQL;
+CREATE TABLE tbl_office(
+office_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+org_id INTEGER NOT NULL REFERENCES tbl_organization(org_id),
+address_id INTEGER NOT NULL REFERENCES tbl_address(address_id),
+CHECK( 'CMP' = get_type(org_id))
+);
+
+CREATE TABLE tbl_job_offer(
+offer_id SERIAL PRIMARY KEY,
+job_title TEXT NOT NULL,
+description TEXT NOT NULL,
+address_id INTEGER NOT NULL REFERENCES tbl_address(address_id),
+office_id INT NOT NULL REFERENCES tbl_office(office_id)
+);
+
+CREATE TABLE tbl_faculty(
+faculty_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+org_id INTEGER NOT NULL REFERENCES tbl_organization(org_id),
+CHECK( 'UNI' = get_type(org_id))
+);
+
+CREATE TABLE tbl_department(
+dept_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+faculty_id INT NOT NULL REFERENCES tbl_faculty(faculty_id),
+address_id INTEGER NOT NULL REFERENCES tbl_address(address_id)
+);
+
+CREATE TABLE tbl_graduate_level(
+grad_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+dept_id INT NOT NULL REFERENCES tbl_department(dept_id)
+);
+
+CREATE TABLE tbl_person(
+person_id SERIAL PRIMARY KEY,
+fname TEXT NOT NULL,
+lname TEXT NOT NULL,
+phone INTEGER,
+mail TEXT NOT NULL UNIQUE,
+bday DATE NOT NULL,
+type VARCHAR(3) NOT NULL,
+address_id INTEGER NOT NULL REFERENCES tbl_address(address_id),
+CHECK( type IN ('TEA','STU','MEM'))
+);
+
+
+CREATE TABLE tbl_teacher(
+teacher_id INT UNIQUE REFERENCES tbl_person(person_id),
+branch TEXT,
+dept_id INT NOT NULL REFERENCES tbl_department(dept_id),
+CHECK('TEA' = get_type(teacher_id))
+);
+
+CREATE TABLE tbl_student(
+student_id INT UNIQUE REFERENCES tbl_person(person_id),
+gpa FLOAT,
+grade varchar(1),
+CHECK( grade IN ('1', '2', '3', '4')),
+CHECK ('STU' = get_type(student_id))
+);
+
+CREATE TABLE tbl_member(
+member_id INT UNIQUE REFERENCES tbl_person(person_id),
+password TEXT NOT NULL,
+CHECK( char_length(password)>=8 ),
+CHECK ('MEM' = get_type(member_id))
+);
+
+CREATE TABLE tbl_file(
+file_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+privacy  BOOLEAN DEFAULT TRUE,
+person_id INTEGER NOT NULL REFERENCES tbl_person(person_id),
+CHECK( 'TEA' = get_type(person_id) OR 'STU' = get_type(person_id))
+);
+
+CREATE TABLE tbl_course(
+course_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+code TEXT NOT NULL,
+credit INTEGER NOT NULL,
+dep_id INT NOT NULL REFERENCES tbl_department(dept_id)
+);
+
+CREATE TABLE tbl_project(
+project_id SERIAL PRIMARY KEY,
+title TEXT NOT NULL,
+description TEXT NOT NULL,
+course_id INTEGER NOT NULL REFERENCES tbl_course(course_id)
+);
+
+CREATE TABLE tbl_group(
+group_id SERIAL PRIMARY KEY,
+name TEXT NOT NULL,
+description TEXT NOT NULL,
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id)
+);
+
+CREATE TABLE tbl_educates_in(
+start_date DATE NOT NULL,
+end_date DATE,
+gpa FLOAT,
+grad_id INT NOT NULL REFERENCES tbl_graduate_level(grad_id),
+person_id INT REFERENCES tbl_person(person_id)
+);
+
+CREATE TABLE tbl_references(
+teacher_id INTEGER NOT NULL REFERENCES tbl_teacher(teacher_id),
+referenced_person_id INTEGER NOT NULL REFERENCES tbl_person(person_id),
+date DATE NOT NULL,
+context TEXT NOT NULL,
+CHECK(teacher_id != referenced_person_id),
+CHECK('TEA' = get_type(teacher_id))
+);
+
+CREATE TABLE tbl_knows(
+person_id INT REFERENCES tbl_person(person_id),
+skill_id INT REFERENCES tbl_skill(skill_id)
+);
+
+CREATE TABLE tbl_teaches(
+teacher_id INTEGER NOT NULL REFERENCES tbl_teacher(teacher_id),
+course_id INTEGER NOT NULL REFERENCES tbl_course(course_id),
+semester TEXT NOT NULL,
+CHECK('TEA' = get_type(teacher_id))
+);
+
+CREATE TABLE tbl_works_on(
+student_id INTEGER NOT NULL REFERENCES tbl_student(student_id),
+course_id INTEGER NOT NULL REFERENCES tbl_course(course_id),
+semester TEXT NOT NULL,
+CHECK('STU' = get_type(student_id))
+);
+
+CREATE TABLE tbl_recommends(
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+recommended_member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+date DATE NOT NULL,
+context TEXT NOT NULL,
+CHECK(member_id != recommended_member_id)
+);
+
+CREATE TABLE tbl_follows(
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+org_id INTEGER NOT NULL REFERENCES tbl_organization(org_id),
+CHECK( 'CMP' = get_type(org_id))
+);
+
+
+CREATE TABLE tbl_works_for(
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+start_date DATE NOT NULL,
+end_date DATE,
+job_title TEXT NOT NULL,
+office_id INT NOT NULL REFERENCES tbl_office(office_id)
+);
+
+CREATE TABLE tbl_applies(
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+date DATE NOT NULL,
+status TEXT DEFAULT 'NOTEXAMINED',
+offer_id INT NOT NULL REFERENCES tbl_job_offer(offer_id),
+CHECK(status IN ('NOTEXAMINED', 'REJECTED', 'ACCEPTED'))
+);
+
+CREATE TABLE tbl_joins(
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+group_id INTEGER NOT NULL REFERENCES tbl_group(group_id)
+);
+
+CREATE TABLE tbl_connects(
+member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+connected_member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
+CHECK(member_id != connected_member_id)
+);
+
