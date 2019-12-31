@@ -1,0 +1,49 @@
+** x öğrencisinin kayıtlandığı kursların listesi
+
+SELECT name 
+FROM tbl_course C 
+INNER JOIN tbl_enrolls E ON C.course_id = E.course_id 
+WHERE student_id = x;
+
+** x öğr kayıtlandığı dersler için yaptığı projelerden aldığı notlar
+
+SELECT grade 
+FROM tbl_project P  
+INNER JOIN  tbl_course C ON P.course_id = C.course_id 
+INNER JOIN tbl_enrolls E ON P.course_id = E.course_id 
+WHERE student_id = x;
+
+**x öğretmeninin çalıştığı departmanın y semesterında verdiği kursların adlarının listesi
+
+SELECT C.name 
+FROM tbl_course C 
+INNER JOIN tbl_department D ON C.dep_id = D.dept_id 
+INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
+WHERE teacher_id = x AND semester=y;
+
+** x öğretmeni nin y semesterında verdiği dersleri alan öğrenciler ve dersi geçme notları
+
+SELECT fname, lname ,E.grade 
+FROM tbl_enrolls E 
+INNER JOIN tbl_student S ON E.student_id = S.student_id 
+INNER JOIN tbl_person  ON person_id = S.student_id 
+INNER JOIN tbl_course C on E.course_id = C.course_id 
+INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
+WHERE teacher_id=x AND E.semester=y AND E.semester = T.semester;
+
+** çalışan sayısı 3'den fazla olan şirketlerin adı ofisleri ve ofis adresleri
+
+SELECT COUNT(member_id),OR.name,  OF.name , county, city, street
+FROM tbl_works_for W
+INNER JOIN tbl_office OF ON W.org_id = OF.org_id
+INNER JOIN tbl_organization 
+INNER JOIN tbl_address A ON OF.address_id = A.address_id
+GROUP BY member_id
+HAVING COUNT(member_id)>3
+
+**member ve öğrenci olan insanları getirmek
+
+SELECT fname, lname FROM tbl_person WHERE person_id IN
+(SELECT student_id FROM tbl_student UNION SELECT member_id FROM tbl_member)
+
+

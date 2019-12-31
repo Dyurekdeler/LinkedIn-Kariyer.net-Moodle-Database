@@ -1,4 +1,4 @@
-CREATE OR REPLACE TABLE tbl_skill (
+CREATE  TABLE tbl_skill (
 skill_id SERIAL PRIMARY KEY,
 name TEXT NOT NULL UNIQUE,
 category TEXT NOT NULL,
@@ -211,6 +211,13 @@ CREATE TABLE tbl_follows(
 member_id INTEGER NOT NULL REFERENCES tbl_member(member_id),
 org_id INTEGER NOT NULL REFERENCES tbl_organization(org_id),
 CHECK( 'CMP' = get_type(org_id))
+);
+
+CREATE TABLE tbl_enrolls(
+student_id INT NOT NULL REFERENCES tbl_student(student_id),
+course_id INT NOT NULL REFERENCES tbl_course(course_id),
+semester TEXT NOT NULL,
+grade FLOAT
 );
 
 

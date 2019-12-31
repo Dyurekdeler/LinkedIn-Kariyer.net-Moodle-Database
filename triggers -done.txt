@@ -1,24 +1,23 @@
 ** bir educates_in tuple'ı eklenirse ve end_date'i null bırakılmışsa, o person'ı student'a da ekle.
 
-CREATE OR REPLACE FUNCTION init_student()
+CREATE OR REPLACE FUNCTION add_active_student()
   RETURNS trigger AS
 $$
 BEGIN
 IF NEW.end_date = Null THEN
          INSERT INTO tbl_student(student_id,gpa,grade)
          VALUES(NEW.person_id,NEW.gpa,'1');
- 
-    RETURN NEW;
+
 END IF;
 END;
 $$
 LANGUAGE 'plpgsql';
 
-CREATE TRIGGER init_student_trigger
+CREATE TRIGGER add_active_student_trigger
   AFTER INSERT
   ON tbl_educates_in
   FOR EACH ROW
-  EXECUTE PROCEDURE init_student();
+  EXECUTE PROCEDURE add_active_student();
 
 **applies tablosunda statusu accepted olan herkesi works_for tablosuna da otomatik ekle(hemen işe başladığı varsayılıyor)
 
@@ -32,8 +31,7 @@ IF NEW.status = 'ACCEPTED' THEN
 		SELECT job_title, member_id, office_id  FROM tbl_job_offer , NEW WHERE offer_id  = NEW.offer_id )
 		INSERT INTO tbl_works_for(member_id,  job_title, office_id, start_date) 
 		SELECT member_id,job_title, office_id FROM  new_worksfor, current.date;
- 
-    RETURN NEW;
+
 END IF;
 END;
 $$
@@ -54,7 +52,7 @@ $$
 BEGIN
 IF NEW.end_date != Null THEN
          DELETE FROM tbl_student WHERE student_id = OLD.student_id;
-    RETURN NEW;
+
 END IF;
 END;
 $$
@@ -65,3 +63,22 @@ CREATE TRIGGER remove_student_trigger
   ON tbl_educates_in
   FOR EACH ROW
   EXECUTE PROCEDURE remove_student();
+
+**member group yarattığı zaman otomatik olarak o gruba join olsun.
+
+CREATE OR REPLACE FUNCTION auto_join_group()
+  RETURNS trigger AS
+$$
+BEGIN
+
+    INSERT INTO tbl_joins(member_id, group_id) VALUES ( NEW.member_id, NEW.group_id);
+
+END;
+$$
+LANGUAGE 'plpgsql';
+
+CREATE TRIGGER auto_join_group_trigger
+  AFTER INSERT
+  ON tbl_group
+  FOR EACH ROW
+  EXECUTE PROCEDURE auto_join_group();

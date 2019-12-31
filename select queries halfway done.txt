@@ -1,0 +1,26 @@
+SELECT name, description FROM tbl_group
+
+SELECT branch FROM tbl_teacher
+
+SELECT name FROM tbl_faculty
+
+***
+
+SELECT gpa, fname, lname 
+FROM tbl_person 
+INNER JOIN tbl_student ON person_id = student_id
+
+SELECT country, city , name
+FROM tbl_department D
+INNER JOIN tbl_address A ON D.address_id = A.address_id
+
+SELECT D.name , C.name
+FROM tbl_course C
+INNER JOIN tbl_department D ON dep_id = dept_id
+
+
+SELECT fname, lname, COUNT(R.member_id)
+FROM tbl_recommends R
+INNER JOIN tbl_member M ON R.member_id = M.member_id
+INNER JOIN tbl_person ON person_id = M.member_id
+GROUP BY R.member_id
