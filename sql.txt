@@ -1,0 +1,41 @@
+** bir educates_in tuple'ı eklenirse ve end_date'i null bırakılmışsa, o person'ı student'a da ekle.
+
+CREATE OR REPLACE FUNCTION init_student()
+  RETURNS trigger AS
+$$
+BEGIN
+IF NEW.end_date = Null THEN
+         INSERT INTO tbl_student(student_id,gpa,grade)
+         VALUES(NEW.person_id,NEW.gpa,'1');
+ 
+    RETURN NEW;
+END IF;
+END;
+$$
+LANGUAGE 'plpgsql';
+
+CREATE TRIGGER init_student_trigger
+  AFTER INSERT
+  ON tbl_educates_in
+  FOR EACH ROW
+  EXECUTE PROCEDURE init_student();
+
+**applies tablosunda statusu accepted olan herkesi works_for tablosuna da otomatik ekle(hemen işe başladığı varsayılıyor)
+
+
+CREATE OR REPLACE FUNCTION init_employment()
+  RETURNS trigger AS
+$$
+BEGIN
+IF NEW.status = 'ACCEPTED' THEN
+      WITH new_worksfor as (
+		SELECT job_title, member_id, office_id  FROM tbl_job_offer , NEW WHERE offer_id  = NEW.offer_id )
+		INSERT INTO tbl_works_for(member_id,  job_title, office_id, start_date) 
+		SELECT member_id,job_title, office_id FROM  new_worksfor, current.date;
+ 
+    RETURN NEW;
+END IF;
+END;
+$$
+LANGUAGE 'plpgsql';
+

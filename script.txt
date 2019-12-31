@@ -1,4 +1,4 @@
-CREATE TABLE tbl_skill (
+CREATE OR REPLACE TABLE tbl_skill (
 skill_id SERIAL PRIMARY KEY,
 name TEXT NOT NULL UNIQUE,
 category TEXT NOT NULL,
@@ -19,7 +19,7 @@ name TEXT NOT NULL UNIQUE,
 phone VARCHAR(11) NOT NULL,
 mail TEXT NOT NULL UNIQUE,
 type VARCHAR(3) NOT NULL,
-CHECK( type IN ('CMP,'UNI'))
+CHECK( type IN ('CMP','UNI'))
 );
 
 CREATE FUNCTION get_type(data_id INT)
@@ -29,6 +29,46 @@ BEGIN
 RETURN (SELECT type FROM tbl_organization WHERE org_id = data_id);
 END; $$
 LANGUAGE PLPGSQL;
+
+CREATE FUNCTION assert_is_teacher(data_id INT)
+RETURNS VARCHAR(5)
+AS $$
+BEGIN
+SELECT EXISTS (SELECT teacher_id FROM tbl_teacher WHERE teacher_id = data_id) AS data_exists;
+IF data_exists != null THEN
+RETURN 'True';
+ELSE
+RETURN 'False';
+END IF;
+END; $$
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION assert_is_student(data_id INT)
+RETURNS VARCHAR(5)
+AS $$
+BEGIN
+SELECT EXISTS (SELECT student_id FROM tbl_student WHERE student_id = data_id) AS data_exists;
+IF data_exists != null THEN
+RETURN 'True';
+ELSE
+RETURN 'False';
+END IF;
+END; $$
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION assert_is_member(data_id INT)
+RETURNS VARCHAR(5)
+AS $$
+BEGIN
+SELECT EXISTS (SELECT member_id FROM tbl_member WHERE member_id = data_id) AS data_exists;
+IF data_exists != null THEN
+RETURN 'True';
+ELSE
+RETURN 'False';
+END IF;
+END; $$
+LANGUAGE PLPGSQL;
+
 CREATE TABLE tbl_office(
 office_id SERIAL PRIMARY KEY,
 name TEXT NOT NULL,
@@ -72,32 +112,28 @@ lname TEXT NOT NULL,
 phone INTEGER,
 mail TEXT NOT NULL UNIQUE,
 bday DATE NOT NULL,
-type VARCHAR(3) NOT NULL,
-address_id INTEGER NOT NULL REFERENCES tbl_address(address_id),
-CHECK( type IN ('TEA','STU','MEM'))
+address_id INTEGER NOT NULL REFERENCES tbl_address(address_id)
 );
 
 
 CREATE TABLE tbl_teacher(
 teacher_id INT UNIQUE REFERENCES tbl_person(person_id),
 branch TEXT,
-dept_id INT NOT NULL REFERENCES tbl_department(dept_id),
-CHECK('TEA' = get_type(teacher_id))
+dept_id INT NOT NULL REFERENCES tbl_department(dept_id)
 );
 
 CREATE TABLE tbl_student(
 student_id INT UNIQUE REFERENCES tbl_person(person_id),
 gpa FLOAT,
 grade varchar(1),
-CHECK( grade IN ('1', '2', '3', '4')),
-CHECK ('STU' = get_type(student_id))
+CHECK( grade IN ('1', '2', '3', '4'))
 );
 
 CREATE TABLE tbl_member(
 member_id INT UNIQUE REFERENCES tbl_person(person_id),
 password TEXT NOT NULL,
 CHECK( char_length(password)>=8 ),
-CHECK ('MEM' = get_type(member_id))
+CHECK ('True' = assert_is_member(member_id))
 );
 
 CREATE TABLE tbl_file(
@@ -105,7 +141,7 @@ file_id SERIAL PRIMARY KEY,
 name TEXT NOT NULL,
 privacy  BOOLEAN DEFAULT TRUE,
 person_id INTEGER NOT NULL REFERENCES tbl_person(person_id),
-CHECK( 'TEA' = get_type(person_id) OR 'STU' = get_type(person_id))
+CHECK( 'True' = assert_is_student(person_id) OR 'True' = assert_is_teacher(person_id))
 );
 
 CREATE TABLE tbl_course(
@@ -143,8 +179,7 @@ teacher_id INTEGER NOT NULL REFERENCES tbl_teacher(teacher_id),
 referenced_person_id INTEGER NOT NULL REFERENCES tbl_person(person_id),
 date DATE NOT NULL,
 context TEXT NOT NULL,
-CHECK(teacher_id != referenced_person_id),
-CHECK('TEA' = get_type(teacher_id))
+CHECK(teacher_id != referenced_person_id)
 );
 
 CREATE TABLE tbl_knows(
@@ -155,15 +190,13 @@ skill_id INT REFERENCES tbl_skill(skill_id)
 CREATE TABLE tbl_teaches(
 teacher_id INTEGER NOT NULL REFERENCES tbl_teacher(teacher_id),
 course_id INTEGER NOT NULL REFERENCES tbl_course(course_id),
-semester TEXT NOT NULL,
-CHECK('TEA' = get_type(teacher_id))
+semester TEXT NOT NULL
 );
 
 CREATE TABLE tbl_works_on(
 student_id INTEGER NOT NULL REFERENCES tbl_student(student_id),
 course_id INTEGER NOT NULL REFERENCES tbl_course(course_id),
-semester TEXT NOT NULL,
-CHECK('STU' = get_type(student_id))
+semester TEXT NOT NULL
 );
 
 CREATE TABLE tbl_recommends(

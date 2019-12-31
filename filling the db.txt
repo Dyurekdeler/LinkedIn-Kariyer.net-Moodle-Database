@@ -1,0 +1,5 @@
+INSERT INTO public.tbl_address(
+	country, city, street, zip)
+	VALUES ('Turkey','İzmir','6281 st','35560'),
+	('Turkey','Ankara','44 st','06600'),
+	('Turkey','İzmir','6144 st','35560');
