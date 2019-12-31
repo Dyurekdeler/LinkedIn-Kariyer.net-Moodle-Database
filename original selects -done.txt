@@ -1,11 +1,11 @@
-** x öğrencisinin kayıtlandığı kursların listesi
+** x öğrencisinin kayıtlandığı kursların adının listesi
 
 SELECT name 
 FROM tbl_course C 
 INNER JOIN tbl_enrolls E ON C.course_id = E.course_id 
 WHERE student_id = x;
 
-** x öğr kayıtlandığı dersler için yaptığı projelerden aldığı notlar
+** x öğrencisinin kayıtlandığı dersler için yaptığı projelerden aldığı notlar
 
 SELECT grade 
 FROM tbl_project P  
@@ -13,15 +13,8 @@ INNER JOIN  tbl_course C ON P.course_id = C.course_id
 INNER JOIN tbl_enrolls E ON P.course_id = E.course_id 
 WHERE student_id = x;
 
-**x öğretmeninin çalıştığı departmanın y semesterında verdiği kursların adlarının listesi
 
-SELECT C.name 
-FROM tbl_course C 
-INNER JOIN tbl_department D ON C.dep_id = D.dept_id 
-INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
-WHERE teacher_id = x AND semester=y;
-
-** x öğretmeni nin y semesterında verdiği dersleri alan öğrenciler ve dersi geçme notları
+** x öğretmeninin y semesterında verdiği dersleri alan öğrenciler ve dersi geçme notları
 
 SELECT fname, lname ,E.grade 
 FROM tbl_enrolls E 
@@ -31,7 +24,7 @@ INNER JOIN tbl_course C on E.course_id = C.course_id
 INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
 WHERE teacher_id=x AND E.semester=y AND E.semester = T.semester;
 
-** çalışan sayısı 3'den fazla olan şirketlerin adı ofisleri ve ofis adresleri
+** çalışan sayısı 3'den fazla olan şirketlerin adı, ofisleri ve ofis adresleri
 
 SELECT COUNT(member_id),OR.name,  OF.name , county, city, street
 FROM tbl_works_for W
@@ -47,3 +40,59 @@ SELECT fname, lname FROM tbl_person WHERE person_id IN
 (SELECT student_id FROM tbl_student UNION SELECT member_id FROM tbl_member)
 
 
+** basit listeler 3 adet
+
+SELECT name, description FROM tbl_group
+
+SELECT branch FROM tbl_teacher
+
+SELECT name FROM tbl_faculty
+
+***
+** öğrenci adı soyadı ve gpası getirmek
+
+SELECT gpa, fname, lname 
+FROM tbl_person 
+INNER JOIN tbl_student ON person_id = student_id
+
+** departman adı ve adresi
+
+SELECT country, city , name
+FROM tbl_department D
+INNER JOIN tbl_address A ON D.address_id = A.address_id
+
+** departmanlar ve verdiği kurslar
+
+SELECT D.name , C.name
+FROM tbl_course C
+INNER JOIN tbl_department D ON dep_id = dept_id
+
+** öğretmenlerin adı, branşı ve çalıştıkları departman adları
+SELECT fname, lname, branch, name
+FROM tbl_teacher T
+INNER JOIN tbl_person ON teacher_id = person_id
+INNER JOIN tbl_department D ON T.dept_id = D.dept_id
+
+
+SELECT fname, lname, COUNT(R.member_id)
+FROM tbl_recommends R
+INNER JOIN tbl_member M ON R.member_id = M.member_id
+INNER JOIN tbl_person ON person_id = M.member_id
+GROUP BY R.member_id
+**x öğretmeninin çalıştığı departmanın y semesterında verdiği kursların adlarının listesi
+
+SELECT C.name 
+FROM tbl_course C 
+INNER JOIN tbl_department D ON C.dep_id = D.dept_id 
+INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
+WHERE teacher_id = x AND semester=y;
+
+
+**varsa yükseklisans eğitimi almış/alıyor olan insanların ismini getir
+SELECT fname, lname
+FROM tbl_person
+WHERE EXISTS( 
+SELECT * FROM tbl_educates_in EI 
+INNER JOIN tbl_person P ON EI.person_id = P.person_id
+INNER JOIN tbl_grad_level G ON EI.grad_id = G.grad_id 
+WHERE name= 'Postgraduate' )
