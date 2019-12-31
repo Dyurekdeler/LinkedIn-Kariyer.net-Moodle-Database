@@ -39,3 +39,29 @@ END;
 $$
 LANGUAGE 'plpgsql';
 
+
+CREATE TRIGGER init_employment_trigger
+  AFTER INSERT OR UPDATE
+  ON tbl_educates_in
+  FOR EACH ROW
+  EXECUTE PROCEDURE init_employment();
+
+**educates_in tablosunda end_Date'i null olmayan student, mezun olmuş kabul edilip student tablosundan çıkartılır. (Not: aynı anda 2 yerde okuyor olma durumu varsa incele)
+
+CREATE OR REPLACE FUNCTION remove_student()
+  RETURNS trigger AS
+$$
+BEGIN
+IF NEW.end_date != Null THEN
+         DELETE FROM tbl_student WHERE student_id = OLD.student_id;
+    RETURN NEW;
+END IF;
+END;
+$$
+LANGUAGE 'plpgsql';
+
+CREATE TRIGGER remove_student_trigger
+  AFTER UPDATE
+  ON tbl_educates_in
+  FOR EACH ROW
+  EXECUTE PROCEDURE remove_student();
