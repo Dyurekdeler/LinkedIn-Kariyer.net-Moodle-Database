@@ -39,7 +39,7 @@ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER init_employment_trigger
   AFTER INSERT OR UPDATE
-  ON tbl_educates_in
+  ON tbl_applies
   FOR EACH ROW
   EXECUTE PROCEDURE init_employment();
 
