@@ -5,11 +5,11 @@ INSERT INTO public.tbl_skill(
 		( 'Python knowledge', 'Software');
 
 INSERT INTO public.tbl_address(
-	 country, city, street, zip)
-	VALUES ( 'Turkey', 'Istanbul', 'Cumhuriyet Street', 34610),
-		( 'Turkey', 'Bursa', 'Zafer Street', 16150),
-		( 'Turkey', 'Izmir', 'Sencer Street', 35310),
-		( 'Turkey', 'Izmir', 'Ataturk Street', 35980);
+	 country, city, street)
+	VALUES ( 'Turkey', 'Istanbul', 'Cumhuriyet Street'),
+		( 'Turkey', 'Bursa', 'Zafer Street'),
+		( 'Turkey', 'Izmir', 'Sencer Street'),
+		( 'Turkey', 'Izmir', 'Ataturk Street');
 
 INSERT INTO public.tbl_organization(
 	 name, phone, mail, type)
@@ -20,7 +20,7 @@ INSERT INTO public.tbl_organization(
 
 INSERT INTO public.tbl_office(
 	 name, org_id, address_id)
-	VALUES ('IT', 3	,2),
+	VALUES ('IT', 3,2),
 		('Frontend', 4,1),
 		('R&D', 3,2);
 
@@ -46,32 +46,22 @@ INSERT INTO public.tbl_department(
 
 INSERT INTO public.tbl_graduate_level(
 	 name, dept_id)
-	VALUES ( 'Bachelors Degree"	,1),
+	VALUES ( 'Bachelors Degree'	,1),
 		('Associate Degree'	,2),
 		('Masters Degree'	,3),
 		('Doctoral degree'	,4);
 
-INSERT INTO public.tbl_person(
-	 fname, lname, phone, mail, bday, address_id)
-	VALUES ( 'Cem',		'Corbacioglu',	NULL,	"cemcorbacioglu@gmail.com",	"1995-01-06",	2),
-		('Deniz',	'Yurekdeler',	NULL,	"dyurekdeler@gmail.com"	,	"1997-07-03",	1),
-		('Ege',		'Kubilay',	NULL,	"ekubilay@gmail.com",		"1990-02-05",	3),
-		('Melisa',	'Erdem'	,	NULL,	"merdem@aol.com",		"1985-01-02",	2),
-		('Ahmet',	'Atakus',	NULL,	"ahmetatakus@hotmail.com",	"1980-05-07",	3),
-		('Bilge',	'Usak'	,	NULL,	"bilgeusak@hotmail.com"	,	"1994-10-11",	3),
-		('Aybars',	'Kokce'	,	NULL,	"akokce@hotmail.com",		"1993-11-09",	3),
-		('Hakan',	'Atilgan',	NULL,	"hatilgan@hotmail.com"	,	"1992-11-10",	3);
 
-INSERT INTO public.tbl_teacher(
-	teacher_id, branch, dept_id)
-	VALUES (4, 'Discrete Math', 1),
-		(5, 'Organical Chemistry', 2),
-		(3, 'Pharmachognosy', 3);
 
-INSERT INTO public.tbl_student(
-	student_id, gpa, grade)
-	VALUES (1, 2.1, 4),
-		(2, 3.5, 4);
+CALL add_person_student('Deniz',	'Yurekdeler',	'05544413061',	'dyurekdeler@gmail.com'	,	'1997-07-03',	1, 3.6, '4')
+CALL add_person_student('Cem',		'Corbacioglu',	'05544413061',	'cemcorbacioglu@gmail.com',	'1995-01-06',	2, 3.5 , '4')
+CALL add_person_student('Aybars',	'Kokce'	,	'05544413061',	'akokce@hotmail.com',		'1993-11-09',	3, 1.9, '3' )
+CALL add_person_member('Ege',		'Kubilay',	'05544413061',	'ekubilay@gmail.com',		'1990-02-05',	3, '12345678')
+CALL add_person_member('Melisa',	'Erdem'	,	'05544413061',	'merdem@aol.com',		'1985-01-02',	2, '12345678')
+CALL add_person_member('Hakan',	'Atilgan',	'05544413061' ,	'hatilgan@hotmail.com'	,	'1992-11-10',	3,'12345678')
+CALL add_person_teacher('Ahmet',	'Atakus',	'05544413061',	'ahmetatakus@hotmail.com',	'1980-05-07',	3, 'Linguistic', 1)
+CALL add_person_teacher('Bilge',	'Usak'	,	'05544413061',	'bilgeusak@hotmail.com'	,	'1994-10-11',	3, 'Object Oriented' ,2)
+
 
 INSERT INTO public.tbl_course(
 	 name, code, credit, dep_id)
@@ -108,9 +98,9 @@ INSERT INTO public.tbl_teaches(
 		(3, 3, 'spring');
 
 INSERT INTO public.tbl_works_on(
-	student_id, course_id, semester)
-	VALUES (1, 1, 'spring'),
-		(2, 1, 'spring');
+	student_id, project_id, grade, semester)
+	VALUES (1, 1, '40' ,'spring'),
+		(2, 1, '50', 'spring');
 
 INSERT INTO public.tbl_enrolls(
 	student_id, course_id, semester, grade)

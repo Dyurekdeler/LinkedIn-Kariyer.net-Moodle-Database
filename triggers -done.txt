@@ -1,10 +1,10 @@
-** bir educates_in tuple'ı eklenirse ve end_date'i null bırakılmışsa, o person'ı student'a da ekle.
+
 
 CREATE OR REPLACE FUNCTION add_active_student()
   RETURNS trigger AS
 $$
 BEGIN
-IF NEW.end_date = Null THEN
+IF NEW.end_date = Null  AND assert_is_student = 'False' THEN
          INSERT INTO tbl_student(student_id,gpa,grade)
          VALUES(NEW.person_id,NEW.gpa,'1');
 
@@ -19,7 +19,6 @@ CREATE TRIGGER add_active_student_trigger
   FOR EACH ROW
   EXECUTE PROCEDURE add_active_student();
 
-**applies tablosunda statusu accepted olan herkesi works_for tablosuna da otomatik ekle(hemen işe başladığı varsayılıyor)
 
 
 CREATE OR REPLACE FUNCTION init_employment()
@@ -44,7 +43,6 @@ CREATE TRIGGER init_employment_trigger
   FOR EACH ROW
   EXECUTE PROCEDURE init_employment();
 
-**educates_in tablosunda end_Date'i null olmayan student, mezun olmuş kabul edilip student tablosundan çıkartılır. (Not: aynı anda 2 yerde okuyor olma durumu varsa incele)
 
 CREATE OR REPLACE FUNCTION remove_student()
   RETURNS trigger AS
@@ -64,7 +62,6 @@ CREATE TRIGGER remove_student_trigger
   FOR EACH ROW
   EXECUTE PROCEDURE remove_student();
 
-**member group yarattığı zaman otomatik olarak o gruba join olsun.
 
 CREATE OR REPLACE FUNCTION auto_join_group()
   RETURNS trigger AS

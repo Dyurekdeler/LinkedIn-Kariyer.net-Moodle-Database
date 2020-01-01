@@ -3,15 +3,66 @@
 SELECT name 
 FROM tbl_course C 
 INNER JOIN tbl_enrolls E ON C.course_id = E.course_id 
-WHERE student_id = x;
+WHERE student_id = 1;
 
-** x öğrencisinin kayıtlandığı dersler için yaptığı projelerden aldığı notlar
+** belirli kişiden daha gençleri bulmak
+
+SELECT fname , lname, bday FROM tbl_person
+  WHERE bday >
+     (SELECT bday FROM tbl_person
+      WHERE fname='Ege')
+
+
+** x öğrencisinin kayıtlandığı dersler için  aldığı notlar
 
 SELECT grade 
 FROM tbl_project P  
 INNER JOIN  tbl_course C ON P.course_id = C.course_id 
 INNER JOIN tbl_enrolls E ON P.course_id = E.course_id 
-WHERE student_id = x;
+WHERE student_id =1
+
+
+** öğrencilerin projelerden aldıkları notlar
+
+SELECT fname, lname , W.grade 
+FROM tbl_person P
+INNER JOIN tbl_student ON student_id = person_id
+INNER JOIN tbl_works_on W ON W.student_id = P.person_id 
+
+**ikameti ankara bursa olan insanlar
+
+SELECT fname 
+FROM tbl_person
+  WHERE address_id =
+     (SELECT address_id 
+	  FROM tbl_address
+	  WHERE Country='Turkey' AND (City='Ankara' OR City='Bursa'))
+
+
+		
+**gpa 3 üzerinde referanslanmış insanların referenas içerikleiyle birlikte getir
+
+SELECT fname, lname, context
+FROM tbl_person
+
+INNER JOIN tbl_references
+ON referenced_person_id =person_id
+
+INNER JOIN tbl_student ON student_id = person_id
+WHERE gpa>3.0 
+
+
+** comp departmenında çalışan  öğreten insan 
+
+SELECT fname,lname
+FROM tbl_person
+WHERE person_id=
+	 (SELECT teacher_id
+	  FROM tbl_teacher
+	  WHERE dept_id=
+	 		(SELECT dept_id
+	  		FROM tbl_department
+	  		WHERE name = 'Computer Science' ))
 
 
 ** x öğretmeninin y semesterında verdiği dersleri alan öğrenciler ve dersi geçme notları
@@ -22,19 +73,20 @@ INNER JOIN tbl_student S ON E.student_id = S.student_id
 INNER JOIN tbl_person  ON person_id = S.student_id 
 INNER JOIN tbl_course C on E.course_id = C.course_id 
 INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
-WHERE teacher_id=x AND E.semester=y AND E.semester = T.semester;
+WHERE teacher_id=7 AND E.semester='winter 2019-2020' AND E.semester = T.semester;
 
 ** çalışan sayısı 3'den fazla olan şirketlerin adı, ofisleri ve ofis adresleri
+**bu sql bozuk **
 
-SELECT COUNT(member_id),OR.name,  OF.name , county, city, street
+SELECT COUNT(member_id),ORG.name,  OF.name , country, city, street
 FROM tbl_works_for W
-INNER JOIN tbl_office OF ON W.org_id = OF.org_id
-INNER JOIN tbl_organization 
-INNER JOIN tbl_address A ON OF.address_id = A.address_id
-GROUP BY member_id
+INNER JOIN tbl_office OFFI ON W.org_id = OFFI.org_id
+INNER JOIN tbl_organization ORG
+INNER JOIN tbl_address A ON OFFI.address_id = A.address_id
+GROUP BY W.office_id
 HAVING COUNT(member_id)>3
 
-**member ve öğrenci olan insanları getirmek
+**member veya öğrenci olan insanları getirmek
 
 SELECT fname, lname FROM tbl_person WHERE person_id IN
 (SELECT student_id FROM tbl_student UNION SELECT member_id FROM tbl_member)
@@ -57,7 +109,7 @@ INNER JOIN tbl_student ON person_id = student_id
 
 ** departman adı ve adresi
 
-SELECT country, city , name
+SELECT country, city ,street, name
 FROM tbl_department D
 INNER JOIN tbl_address A ON D.address_id = A.address_id
 
@@ -74,25 +126,30 @@ INNER JOIN tbl_person ON teacher_id = person_id
 INNER JOIN tbl_department D ON T.dept_id = D.dept_id
 
 
+**bu sql bozuk
 SELECT fname, lname, COUNT(R.member_id)
 FROM tbl_recommends R
 INNER JOIN tbl_member M ON R.member_id = M.member_id
 INNER JOIN tbl_person ON person_id = M.member_id
 GROUP BY R.member_id
+
+
 **x öğretmeninin çalıştığı departmanın y semesterında verdiği kursların adlarının listesi
 
 SELECT C.name 
 FROM tbl_course C 
 INNER JOIN tbl_department D ON C.dep_id = D.dept_id 
 INNER JOIN tbl_teaches T ON T.course_id = C.course_id 
-WHERE teacher_id = x AND semester=y;
+WHERE teacher_id = 7 AND semester='winter 2019-2020';
 
 
 **varsa yükseklisans eğitimi almış/alıyor olan insanların ismini getir
+** sql çalışıyor ama return edeceği değer yok
+
 SELECT fname, lname
 FROM tbl_person
 WHERE EXISTS( 
 SELECT * FROM tbl_educates_in EI 
 INNER JOIN tbl_person P ON EI.person_id = P.person_id
-INNER JOIN tbl_grad_level G ON EI.grad_id = G.grad_id 
-WHERE name= 'Postgraduate' )
+INNER JOIN tbl_graduate_level G ON EI.grad_id = G.grad_id 
+WHERE name= 'Associate Degree' )
