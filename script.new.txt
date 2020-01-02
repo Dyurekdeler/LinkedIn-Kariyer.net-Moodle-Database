@@ -256,6 +256,18 @@ CHECK(status IN ('NOTEXAMINED', 'REJECTED', 'ACCEPTED')),
 UNIQUE(offer_id , member_id)
 );
 
+CREATE TABLE tbl_messages(
+from_person_id INT NOT NULL REFERENCES tbl_person(person_id),
+to_person_id INT NOT NULL REFERENCES tbl_person(person_id),
+title TEXT,
+context TEXT,
+date DATE NOT NULL,
+CHECK( ('True' = assert_is_student(to_person_id) OR 'True' = assert_is_teacher(from_person_id)) OR
+( ('True' = assert_is_student(from_person_id) OR 'True' = assert_is_teacher(to_person_id))),
+CHECK(from_person_id != tpo_person_id)
+);
+
+
 CREATE TABLE tbl_joins(
 member_id INTEGER NOT NULL REFERENCES tbl_member(member_id) ON DELETE CASCADE,
 group_id INTEGER NOT NULL REFERENCES tbl_group(group_id) ON DELETE CASCADE,

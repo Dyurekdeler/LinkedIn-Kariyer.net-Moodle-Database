@@ -1,3 +1,21 @@
+10 a)
+INSERT INTO tbl_skill(name,category) VALUES ('Android Developement','Software');
+UPDATE tbl_skill SET  name='Android Mobile Development' WHERE skill_id = 4;
+DELETE FROM tbl_skill WHERE skill_id = 4;
+
+INSERT INTO tbl_job_offer VALUES (job_title, description, address_id , office_id) VALUES ('Müzik Öğretmeni', 'Ege Üniversitesinde 1. sınıflara müzik eğitimi verecek öğretmen', 1, 1);
+UPDATE tbl_job_offer SET job_title='Halk Müziği Öğretmeni', description='Ege üniversitesinde ortak seçmeli derste halk müziği dersi verecek öğretmen', address_id=1, office_id=1 WHERE offer_id = 5;
+DELETE FROM tbl_job_offer WHERE offer_id = 5;
+
+
+INSERT INTO tbl_works_for(member_id, start_date,  job_title, office_id) VALUES (2, '12.12.2016', 'RD Engineer' , 1);
+UPDATE tbl_works_for SET , end_date='05.09.2019', job_title='Senior RD Engineer'
+	WHERE member_id = 2, job_title = 'RD Engineer', office_id=1;
+DELETE FROM tbl_works_for WHERE member_id = 2, job_title = 'Senior RD Engineer', office_id=1;
+
+
+
+
 10.b)
 i)
 
@@ -12,7 +30,7 @@ SELECT name FROM tbl_faculty
 SELECT fname , lname, bday FROM tbl_person
   WHERE bday >
      (SELECT bday FROM tbl_person
-      WHERE fname='Ege')
+      WHERE fname='Ege' AND lname='Kubilay')
 
 
 ii)
